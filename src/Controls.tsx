@@ -1,5 +1,5 @@
 import { useControls, folder, Leva } from 'leva';
-import { isChineseLanguage } from './utils';
+import { isChineseLanguage, isUzbekLanguage } from './utils';
 import { LevaVectorNew } from './components/LevaVectorNew/LevaVectorNew';
 // import { LevaImageUpload } from './components/LevaImageUpload/LevaImageUpload';
 import { LevaContainer } from './components/LevaContainer/LevaContainer';
@@ -15,7 +15,7 @@ export const useLevaControls = ({
   };
 }) => {
   const [langName, setLangName] = useState<keyof typeof languages>(
-    isChineseLanguage() ? 'zh-CN' : 'en-US',
+    isChineseLanguage() ? 'zh-CN' : isUzbekLanguage() ? 'uz-UZ' : 'en-US',
   );
   const lang = useMemo(() => {
     return languages[langName];
@@ -31,10 +31,12 @@ export const useLevaControls = ({
             ? [
               { value: 'en-US', label: 'English' },
               { value: 'zh-CN', label: '简体中文' },
+              { value: 'uz-UZ', label: "O'zbekcha" },
             ]
             : [
               { value: 'zh-CN', label: '简体中文' },
               { value: 'en-US', label: 'English' },
+              { value: 'uz-UZ', label: "O'zbekcha" },
             ],
           onClick: (v) => {
             setLangName((v as (keyof typeof languages)[])[0]);
