@@ -90,7 +90,7 @@ pnpm build
 - [ ] Glass Presets
 - [ ] Self-illumination
 - [ ] HDR illumination
-- [ ] Control parameter import / export
+- [x] Control parameter import / export
 - [x] Render Step view to show intermediate results
 - [ ] UI Content inside of shape
 

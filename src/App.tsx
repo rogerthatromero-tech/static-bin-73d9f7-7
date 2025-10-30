@@ -45,6 +45,8 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import PlayCircleOutlinedIcon from '@mui/icons-material/PlayCircleOutlined';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import { useLevaControls } from './Controls';
+import { PresetControls } from './components/PresetControls/PresetControls';
+
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -54,7 +56,7 @@ function App() {
     dpr: 1,
   });
 
-  const { controls, lang, langName, levaGlobal } = useLevaControls({
+  const { controls, lang, langName, levaGlobal, controlsAPI } = useLevaControls({
     containerRender: {
       /* eslint-disable react-hooks/rules-of-hooks */
       bgType: ({ value, setValue }) => {
@@ -604,6 +606,11 @@ function App() {
           </a>
         </div>
       </header>
+      <PresetControls
+        controls={controls}
+        controlsAPI={controlsAPI}
+        lang={lang}
+      />
       <ResizableWindow
         disableMove
         size={canvasInfo}

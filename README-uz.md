@@ -94,7 +94,7 @@ pnpm build
 - [ ] Shisha uchun tayyor andozalar
 - [ ] Shakl yoki obyektning o‘zi yorug‘lik chiqarishi (ya’ni, ichidan porlashi).
 - [ ] HDR yoritish
-- [ ] Parametrlarni import/export qilish
+- [x] Parametrlarni import/export qilish
 - [x] Render bosqichlarini ko‘rish (Render Step View)
 - [ ] Shakl ichida UI kontentni joylashtirish
 
