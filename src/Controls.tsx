@@ -181,6 +181,13 @@ export const useLevaControls = ({
       //   // alphaPatternColorB: '#eee',
       // }),
       ['shapeSettings']: folder({
+        groupScale: {
+          label: 'Group Scale',
+          min: 0,
+          max: 200,
+          step: 1,
+          value: 100,
+        },
         shapeWidth: {
           label: lang['editor.shapeWidth'],
           min: 20,

@@ -589,6 +589,7 @@ function App() {
         u_shape5HorizontalOffset: controls.shape5HorizontalOffset,
         u_shape4HorizontalOffset: controls.shape4HorizontalOffset,
         u_shapes123VerticalSpacing: controls.shapes123VerticalSpacing,
+        u_groupScale: controls.groupScale,
       });
 
       renderer.render({

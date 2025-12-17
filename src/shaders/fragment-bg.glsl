@@ -39,6 +39,7 @@ uniform float u_shapes123HorizontalOffset;
 uniform float u_shape5HorizontalOffset;
 uniform float u_shape4HorizontalOffset;
 uniform float u_shapes123VerticalSpacing;
+uniform float u_groupScale;
 
 float chessboard(vec2 uv, float size, int mode) {
   float yBars = step(size * 2.0, mod(uv.y * 2.0, size * 4.0));
@@ -118,44 +119,45 @@ float mainSDF(vec2 p1, vec2 p2, vec2 p) {
   vec2 p2n = p2 + p / u_resolution.y;
   
   // Create 5 squares: 3 stacked on left, 1 in center, 1 on right
-  float horizontalSpacing = 200.0 * u_dpr / u_resolution.y;
+  float scale = u_groupScale / 100.0;
+  float horizontalSpacing = 200.0 * u_dpr / u_resolution.y * scale;
   float verticalSpacing = 150.0 * u_dpr / u_resolution.y;
-  float shapes123Offset = u_shapes123HorizontalOffset * u_dpr / u_resolution.y;
-  float shape5Offset = u_shape5HorizontalOffset * u_dpr / u_resolution.y;
-  float shape4Offset = u_shape4HorizontalOffset * u_dpr / u_resolution.y;
-  float shapes123VSpacing = u_shapes123VerticalSpacing * u_dpr / u_resolution.y;
+  float shapes123Offset = u_shapes123HorizontalOffset * u_dpr / u_resolution.y * scale;
+  float shape5Offset = u_shape5HorizontalOffset * u_dpr / u_resolution.y * scale;
+  float shape4Offset = u_shape4HorizontalOffset * u_dpr / u_resolution.y * scale;
+  float shapes123VSpacing = u_shapes123VerticalSpacing * u_dpr / u_resolution.y * scale;
   
   // Right column: 3 squares stacked vertically
   float s1 = sdRoundedBox(
     p1n + vec2(horizontalSpacing + shapes123Offset, shapes123VSpacing),
-    vec2(u_shape1Width, u_shape1Height) * 0.5 * u_dpr / u_resolution.y,
-    u_shapesBorderRadius * u_dpr / u_resolution.y
+    vec2(u_shape1Width, u_shape1Height) * 0.5 * u_dpr / u_resolution.y * scale,
+    u_shapesBorderRadius * u_dpr / u_resolution.y * scale
   );
   
   float s2 = sdRoundedBox(
     p1n + vec2(horizontalSpacing + shapes123Offset, 0.0),
-    vec2(u_shape2Width, u_shape2Height) * 0.5 * u_dpr / u_resolution.y,
-    u_shapesBorderRadius * u_dpr / u_resolution.y
+    vec2(u_shape2Width, u_shape2Height) * 0.5 * u_dpr / u_resolution.y * scale,
+    u_shapesBorderRadius * u_dpr / u_resolution.y * scale
   );
   
   float s3 = sdRoundedBox(
     p1n + vec2(horizontalSpacing + shapes123Offset, -shapes123VSpacing),
-    vec2(u_shape3Width, u_shape3Height) * 0.5 * u_dpr / u_resolution.y,
-    u_shapesBorderRadius * u_dpr / u_resolution.y
+    vec2(u_shape3Width, u_shape3Height) * 0.5 * u_dpr / u_resolution.y * scale,
+    u_shapesBorderRadius * u_dpr / u_resolution.y * scale
   );
   
   // Center square
   float s4 = sdRoundedBox(
     p1n + vec2(shape4Offset, 0.0),
-    vec2(u_shape4Width, u_shape4Height) * 0.5 * u_dpr / u_resolution.y,
-    u_shapesBorderRadius * u_dpr / u_resolution.y
+    vec2(u_shape4Width, u_shape4Height) * 0.5 * u_dpr / u_resolution.y * scale,
+    u_shapesBorderRadius * u_dpr / u_resolution.y * scale
   );
   
   // Left square
   float s5 = sdRoundedBox(
     p1n + vec2(-horizontalSpacing + shape5Offset, 0.0),
-    vec2(u_shape5Width, u_shape5Height) * 0.5 * u_dpr / u_resolution.y,
-    u_shapesBorderRadius * u_dpr / u_resolution.y
+    vec2(u_shape5Width, u_shape5Height) * 0.5 * u_dpr / u_resolution.y * scale,
+    u_shapesBorderRadius * u_dpr / u_resolution.y * scale
   );
   
   // Merge the 5 squares
