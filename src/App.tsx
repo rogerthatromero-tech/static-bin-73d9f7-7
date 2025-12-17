@@ -327,6 +327,36 @@ function App() {
     }
   }, [controls.bgType]);
 
+  // Listen for postMessage from Shopify Liquid section
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      // Validate message structure
+      if (!event.data || event.data.type !== 'LG_SET_SHAPES') {
+        return;
+      }
+
+      const { bgTintColor } = event.data;
+      
+      // Update tint color if provided
+      if (bgTintColor && typeof bgTintColor === 'object') {
+        const { r, g, b, a } = bgTintColor;
+        if (typeof r === 'number' && typeof g === 'number' && typeof b === 'number') {
+          controlsAPI.set('bgTintColor', {
+            r: Math.round(r * 255),
+            g: Math.round(g * 255),
+            b: Math.round(b * 255),
+            a: typeof a === 'number' ? a : 1,
+          });
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, [controlsAPI]);
+
   // useEffect(() => {
   //   setLangName(controls.language[0] as keyof typeof languages);
   // }, [controls.language]);
