@@ -657,9 +657,6 @@ function App() {
               ['--dpr']: canvasInfo.dpr,
             } as CSSProperties}
           />
-          <a href="#editor" className={styles.viewLink}>
-            Open Editor View
-          </a>
         </div>
       ) : (
         <>
