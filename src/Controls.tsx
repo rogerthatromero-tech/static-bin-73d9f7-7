@@ -184,9 +184,9 @@ export const useLevaControls = ({
         groupScale: {
           label: 'Group Scale',
           min: 0,
-          max: 200,
+          max: 300,
           step: 1,
-          value: 200,
+          value: 250,
         },
         shapeWidth: {
           label: lang['editor.shapeWidth'],
