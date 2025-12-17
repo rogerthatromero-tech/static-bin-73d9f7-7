@@ -166,9 +166,13 @@ export const useLevaControls = ({
       }),
       bgType: LevaContainer({
         label: lang['editor.bgType'],
-        contentValue: 0,
+        contentValue: 10,
         content: containerRender.bgType,
       }),
+      bgTintColor: {
+        label: 'Background Tint Color',
+        value: { r: 255, g: 255, b: 255, a: 0 },
+      },
       // customBgImage: LevaImageUpload({
       //   label: lang['editor.customBgImage'],
       //   file: undefined,
@@ -210,11 +214,95 @@ export const useLevaControls = ({
           min: 0,
           max: 0.3,
           step: 0.01,
-          value: 0.05,
+          value: 0.02,
         },
         showShape1: {
           label: lang['editor.showShape1'],
           value: true,
+        },
+        show2ndShape: {
+          label: 'Show 2nd Shape',
+          value: true,
+        },
+        shapesBorderRadius: {
+          label: 'Shapes Border Radius',
+          min: 0,
+          max: 100,
+          step: 1,
+          value: 10,
+        },
+        // Shapes 1-3 (right column - 3 stacked)
+        shapes123Width: {
+          label: 'Shapes 1-3 Width',
+          min: 20,
+          max: 200,
+          step: 1,
+          value: 112,
+        },
+        shapes123Height: {
+          label: 'Shapes 1-3 Height',
+          min: 20,
+          max: 200,
+          step: 1,
+          value: 69,
+        },
+        shapes123HorizontalOffset: {
+          label: 'Shapes 1-3 Horizontal Offset',
+          min: -300,
+          max: 300,
+          step: 1,
+          value: 24,
+        },
+        shapes123VerticalSpacing: {
+          label: 'Shapes 1-3 Vertical Spacing',
+          min: 50,
+          max: 300,
+          step: 1,
+          value: 82,
+        },
+        // Shape 4 (center)
+        shape4Width: {
+          label: 'Shape 4 Width',
+          min: 20,
+          max: 350,
+          step: 1,
+          value: 235,
+        },
+        shape4Height: {
+          label: 'Shape 4 Height',
+          min: 20,
+          max: 600,
+          step: 1,
+          value: 233,
+        },
+        shape4HorizontalOffset: {
+          label: 'Shape 4 Horizontal Offset',
+          min: -300,
+          max: 300,
+          step: 1,
+          value: 38,
+        },
+        // Shape 5 (left)
+        shape5Width: {
+          label: 'Shape 5 Width',
+          min: 20,
+          max: 200,
+          step: 1,
+          value: 188,
+        },
+        shape5Height: {
+          label: 'Shape 5 Height',
+          min: 20,
+          max: 600,
+          step: 1,
+          value: 233,
+        },
+        shape5HorizontalOffset: {
+          label: 'Shape 5 Horizontal Offset',
+          min: -300,
+          max: 300,
+          step: 1,
+          value: 14,
         },
       }),
       animationSettings: folder({

@@ -49,12 +49,39 @@ import { PresetControls } from './components/PresetControls/PresetControls';
 
 
 function App() {
+  const [viewMode, setViewMode] = useState<'editor' | 'fullscreen'>(
+    window.location.hash === '#fullscreen' ? 'fullscreen' : 'editor'
+  );
+  
+  useEffect(() => {
+    const handleHashChange = () => {
+      setViewMode(window.location.hash === '#fullscreen' ? 'fullscreen' : 'editor');
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+  
+  useEffect(() => {
+    if (viewMode === 'fullscreen') {
+      document.body.classList.add('fullscreen-mode');
+    } else {
+      document.body.classList.remove('fullscreen-mode');
+    }
+    return () => {
+      document.body.classList.remove('fullscreen-mode');
+    };
+  }, [viewMode]);
+  
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [canvasInfo, setCanvasInfo] = useState<{ width: number; height: number; dpr: number }>({
-    width: Math.max(Math.min(window.innerWidth, window.innerHeight) - 150, 600),
-    height: Math.max(Math.min(window.innerWidth, window.innerHeight) - 150, 600),
-    dpr: 1,
-  });
+  const [canvasInfo, setCanvasInfo] = useState<{ width: number; height: number; dpr: number }>(
+    window.location.hash === '#fullscreen'
+      ? { width: window.innerWidth, height: window.innerHeight, dpr: window.devicePixelRatio }
+      : {
+          width: Math.max(Math.min(window.innerWidth, window.innerHeight) - 150, 600),
+          height: Math.max(Math.min(window.innerWidth, window.innerHeight) - 150, 600),
+          dpr: 1,
+        }
+  );
 
   const { controls, lang, langName, levaGlobal, controlsAPI } = useLevaControls({
     containerRender: {
@@ -292,6 +319,14 @@ function App() {
   stateRef.current.controls = controls;
   stateRef.current.langName = langName;
 
+  // Initialize default background video
+  useEffect(() => {
+    if (controls.bgType === 10 && !stateRef.current.bgTextureUrl) {
+      stateRef.current.bgTextureUrl = bgVideo3;
+      stateRef.current.bgTextureType = 'video';
+    }
+  }, [controls.bgType]);
+
   // useEffect(() => {
   //   setLangName(controls.language[0] as keyof typeof languages);
   // }, [controls.language]);
@@ -316,11 +351,19 @@ function App() {
 
   useLayoutEffect(() => {
     const onResize = () => {
-      centerizeCanvasWindow();
-      setCanvasInfo((v) => ({
-        ...v,
-        dpr: window.devicePixelRatio,
-      }));
+      if (viewMode === 'fullscreen') {
+        setCanvasInfo({
+          width: window.innerWidth,
+          height: window.innerHeight,
+          dpr: window.devicePixelRatio,
+        });
+      } else {
+        centerizeCanvasWindow();
+        setCanvasInfo((v) => ({
+          ...v,
+          dpr: window.devicePixelRatio,
+        }));
+      }
     };
     window.addEventListener('resize', onResize);
     onResize();
@@ -328,7 +371,7 @@ function App() {
     return () => {
       window.removeEventListener('resize', onResize);
     };
-  }, []);
+  }, [centerizeCanvasWindow, viewMode]);
 
   useLayoutEffect(() => {
     if (!canvasRef.current) {
@@ -531,6 +574,21 @@ function App() {
         u_mergeRate: controls.mergeRate,
         u_glareAngle: (controls.glareAngle * Math.PI) / 180,
         u_showShape1: controls.showShape1 ? 1 : 0,
+        u_shape1Width: controls.shapes123Width,
+        u_shape1Height: controls.shapes123Height,
+        u_shape2Width: controls.shapes123Width,
+        u_shape2Height: controls.shapes123Height,
+        u_shape3Width: controls.shapes123Width,
+        u_shape3Height: controls.shapes123Height,
+        u_shape4Width: controls.shape4Width,
+        u_shape4Height: controls.shape4Height,
+        u_shape5Width: controls.shape5Width,
+        u_shape5Height: controls.shape5Height,
+        u_shapesBorderRadius: controls.shapesBorderRadius,
+        u_shapes123HorizontalOffset: controls.shapes123HorizontalOffset,
+        u_shape5HorizontalOffset: controls.shape5HorizontalOffset,
+        u_shape4HorizontalOffset: controls.shape4HorizontalOffset,
+        u_shapes123VerticalSpacing: controls.shapes123VerticalSpacing,
       });
 
       renderer.render({
@@ -545,6 +603,12 @@ function App() {
           u_shadowExpand: controls.shadowExpand,
           u_shadowFactor: controls.shadowFactor / 100,
           u_shadowPosition: [-controls.shadowPosition.x, -controls.shadowPosition.y],
+          u_bgTintColor: [
+            controls.bgTintColor.r / 255,
+            controls.bgTintColor.g / 255,
+            controls.bgTintColor.b / 255,
+            controls.bgTintColor.a,
+          ],
         },
         mainPass: {
           u_tint: [
@@ -581,66 +645,88 @@ function App() {
 
   return (
     <>
-      {levaGlobal}
-      <header className={styles.header}>
-        <div className={styles.logoWrapper}>
-          <div className={styles.title}>Liquid Glass Studio</div>
-          <div className={styles.subtitle}>{lang['ui.subtitle']}</div>
-        </div>
-        <div className={styles.content}>
-          <span>
-            by <a>iyinchao</a>
-          </span>
-          <a
-            href="https://github.com/iyinchao/liquid-glass-studio"
-            target="_blank"
-            className={styles.button}
-          >
-            <GitHubIcon />
-          </a>
-          <a
-            href="https://x.com/charles_yin/status/1936338569267986605"
-            target="_blank"
-            className={styles.button}
-          >
-            <XIcon></XIcon>
-          </a>
-        </div>
-      </header>
-      <PresetControls
-        controls={controls}
-        controlsAPI={controlsAPI}
-        lang={lang}
-      />
-      <ResizableWindow
-        disableMove
-        size={canvasInfo}
-        onResize={(size) => {
-          setCanvasInfo({
-            ...size,
-            dpr: window.devicePixelRatio,
-          });
-          centerizeCanvasWindow();
-        }}
-        onMove={(pos) => {
-          stateRef.current.canvasPos = pos;
-        }}
-        ctrlRef={(ref) => {
-          stateRef.current.canvasWindowCtrlRef = ref;
-        }}
-      >
-        <div className={clsx(styles.canvasContainer)}>
+      {viewMode === 'fullscreen' ? (
+        <div className={styles.fullscreenContainer}>
           <canvas
             ref={canvasRef}
-            className={styles.canvas}
-            style={
-              {
-                ['--dpr']: canvasInfo.dpr,
-              } as CSSProperties
-            }
+            className={styles.fullscreenCanvas}
+            style={{
+              width: '100vw',
+              height: '100vh',
+              ['--dpr']: canvasInfo.dpr,
+            } as CSSProperties}
           />
+          <a href="#editor" className={styles.viewLink}>
+            Open Editor View
+          </a>
         </div>
-      </ResizableWindow>
+      ) : (
+        <>
+          {levaGlobal}
+          <header className={styles.header}>
+            <div className={styles.logoWrapper}>
+              <div className={styles.title}>Liquid Glass Studio</div>
+              <div className={styles.subtitle}>{lang['ui.subtitle']}</div>
+            </div>
+            <div className={styles.content}>
+              <span>
+                by <a>iyinchao</a>
+              </span>
+              <a
+                href="https://github.com/iyinchao/liquid-glass-studio"
+                target="_blank"
+                className={styles.button}
+              >
+                <GitHubIcon />
+              </a>
+              <a
+                href="https://x.com/charles_yin/status/1936338569267986605"
+                target="_blank"
+                className={styles.button}
+              >
+                <XIcon></XIcon>
+              </a>
+              <a href="#fullscreen" className={styles.button} title="Open Fullscreen View">
+                <PlayCircleOutlinedIcon />
+              </a>
+            </div>
+          </header>
+          <PresetControls
+            controls={controls}
+            controlsAPI={controlsAPI}
+            lang={lang}
+          />
+          <ResizableWindow
+            disableMove
+            size={canvasInfo}
+            onResize={(size) => {
+              setCanvasInfo({
+                ...size,
+                dpr: window.devicePixelRatio,
+              });
+              centerizeCanvasWindow();
+            }}
+            onMove={(pos) => {
+              stateRef.current.canvasPos = pos;
+            }}
+            ctrlRef={(ref) => {
+              stateRef.current.canvasWindowCtrlRef = ref;
+            }}
+          >
+            <div className={clsx(styles.canvasContainer)}>
+              <canvas
+                ref={canvasRef}
+                className={styles.canvas}
+                style={
+                  {
+                    ['--dpr']: canvasInfo.dpr,
+                  } as CSSProperties
+                }
+              />
+            </div>
+          </ResizableWindow>
+        </>
+      )}
     </>
   );
 }

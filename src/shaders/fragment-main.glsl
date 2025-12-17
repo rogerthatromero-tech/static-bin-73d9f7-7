@@ -35,6 +35,21 @@ uniform float u_glareHardness;
 uniform float u_glareAngle;
 uniform int u_blurEdge;
 uniform int u_showShape1;
+uniform float u_shape1Width;
+uniform float u_shape1Height;
+uniform float u_shape2Width;
+uniform float u_shape2Height;
+uniform float u_shape3Width;
+uniform float u_shape3Height;
+uniform float u_shape4Width;
+uniform float u_shape4Height;
+uniform float u_shape5Width;
+uniform float u_shape5Height;
+uniform float u_shapesBorderRadius;
+uniform float u_shapes123HorizontalOffset;
+uniform float u_shape5HorizontalOffset;
+uniform float u_shape4HorizontalOffset;
+uniform float u_shapes123VerticalSpacing;
 
 uniform int STEP;
 
@@ -42,6 +57,12 @@ out vec4 fragColor;
 
 float sdCircle(vec2 p, float r) {
   return length(p) - r;
+}
+
+// Simple rounded rectangle SDF
+float sdRoundedBox(vec2 p, vec2 b, float r) {
+  vec2 d = abs(p) - b + r;
+  return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - r;
 }
 
 vec3 sdSuperellipse(vec2 p, float r, float n) {
@@ -114,16 +135,58 @@ float mainSDF(vec2 p1, vec2 p2, vec2 p) {
   vec2 p1n = p1 + p / u_resolution.y;
   vec2 p2n = p2 + p / u_resolution.y;
 
-  float d1 = u_showShape1 == 1 ? sdCircle(p1n, 100.0 * u_dpr / u_resolution.y) : 1.0;
-  // float d2 = sdSuperellipse(p2, 200.0 / u_resolution.y, 4.0).x;
-  float d2 = roundedRectSDF(
-    p2n,
-    vec2(0.0),
-    u_shapeWidth / u_resolution.y,
-    u_shapeHeight / u_resolution.y,
-    u_shapeRadius / u_resolution.y,
-    u_shapeRoundness
+  // Create 5 squares: 3 stacked on left, 1 in center, 1 on right
+  float horizontalSpacing = 200.0 * u_dpr / u_resolution.y;
+  float verticalSpacing = 150.0 * u_dpr / u_resolution.y;
+  float shapes123Offset = u_shapes123HorizontalOffset * u_dpr / u_resolution.y;
+  float shape5Offset = u_shape5HorizontalOffset * u_dpr / u_resolution.y;
+  float shape4Offset = u_shape4HorizontalOffset * u_dpr / u_resolution.y;
+  float shapes123VSpacing = u_shapes123VerticalSpacing * u_dpr / u_resolution.y;
+  
+  // Right column: 3 squares stacked vertically
+  float s1 = sdRoundedBox(
+    p1n + vec2(horizontalSpacing + shapes123Offset, shapes123VSpacing),
+    vec2(u_shape1Width, u_shape1Height) * 0.5 * u_dpr / u_resolution.y,
+    u_shapesBorderRadius * u_dpr / u_resolution.y
   );
+  
+  float s2 = sdRoundedBox(
+    p1n + vec2(horizontalSpacing + shapes123Offset, 0.0),
+    vec2(u_shape2Width, u_shape2Height) * 0.5 * u_dpr / u_resolution.y,
+    u_shapesBorderRadius * u_dpr / u_resolution.y
+  );
+  
+  float s3 = sdRoundedBox(
+    p1n + vec2(horizontalSpacing + shapes123Offset, -shapes123VSpacing),
+    vec2(u_shape3Width, u_shape3Height) * 0.5 * u_dpr / u_resolution.y,
+    u_shapesBorderRadius * u_dpr / u_resolution.y
+  );
+  
+  // Center square
+  float s4 = sdRoundedBox(
+    p1n + vec2(shape4Offset, 0.0),
+    vec2(u_shape4Width, u_shape4Height) * 0.5 * u_dpr / u_resolution.y,
+    u_shapesBorderRadius * u_dpr / u_resolution.y
+  );
+  
+  // Left square
+  float s5 = sdRoundedBox(
+    p1n + vec2(-horizontalSpacing + shape5Offset, 0.0),
+    vec2(u_shape5Width, u_shape5Height) * 0.5 * u_dpr / u_resolution.y,
+    u_shapesBorderRadius * u_dpr / u_resolution.y
+  );
+  
+  // Merge the 5 squares
+  float squares = s1;
+  squares = smin(squares, s2, u_mergeRate);
+  squares = smin(squares, s3, u_mergeRate);
+  squares = smin(squares, s4, u_mergeRate);
+  squares = smin(squares, s5, u_mergeRate);
+  
+  float d1 = u_showShape1 == 1 ? squares : 1.0;
+  
+  // Cursor shape - circle with fixed radius
+  float d2 = sdCircle(p2n, 20.0 * u_dpr / u_resolution.y);
 
   return smin(d1, d2, u_mergeRate);
 }
