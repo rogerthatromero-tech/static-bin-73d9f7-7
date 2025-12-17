@@ -46,6 +46,7 @@ import PlayCircleOutlinedIcon from '@mui/icons-material/PlayCircleOutlined';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import { useLevaControls } from './Controls';
 import { PresetControls } from './components/PresetControls/PresetControls';
+import { levaStore } from 'leva';
 
 
 function App() {
@@ -341,12 +342,12 @@ function App() {
       if (bgTintColor && typeof bgTintColor === 'object') {
         const { r, g, b, a } = bgTintColor;
         if (typeof r === 'number' && typeof g === 'number' && typeof b === 'number') {
-          controlsAPI.set('bgTintColor', {
+          levaStore.set({ bgTintColor: {
             r: Math.round(r * 255),
             g: Math.round(g * 255),
             b: Math.round(b * 255),
             a: typeof a === 'number' ? a : 1,
-          });
+          } });
         }
       }
     };
@@ -355,7 +356,7 @@ function App() {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [controlsAPI]);
+  }, []);
 
   // useEffect(() => {
   //   setLangName(controls.language[0] as keyof typeof languages);
