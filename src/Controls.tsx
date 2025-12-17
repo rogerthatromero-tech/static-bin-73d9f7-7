@@ -186,7 +186,7 @@ export const useLevaControls = ({
           min: 0,
           max: 200,
           step: 1,
-          value: 100,
+          value: 200,
         },
         shapeWidth: {
           label: lang['editor.shapeWidth'],
