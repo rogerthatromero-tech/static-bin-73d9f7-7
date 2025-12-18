@@ -381,12 +381,14 @@ function App() {
       if (bgTintColor && typeof bgTintColor === 'object') {
         const { r, g, b, a } = bgTintColor;
         if (typeof r === 'number' && typeof g === 'number' && typeof b === 'number') {
-          levaStore.set({ bgTintColor: {
-            r: Math.round(r * 255),
-            g: Math.round(g * 255),
-            b: Math.round(b * 255),
-            a: typeof a === 'number' ? a : 1,
-          } });
+          levaStore.set({
+            bgTintColor: {
+              r: Math.round(r * 255),
+              g: Math.round(g * 255),
+              b: Math.round(b * 255),
+              a: typeof a === 'number' ? a : 1,
+            }
+          }, false);
         }
       }
     };
