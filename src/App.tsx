@@ -48,6 +48,45 @@ import { useLevaControls } from './Controls';
 import { PresetControls } from './components/PresetControls/PresetControls';
 import { levaStore } from 'leva';
 
+// Helper function to ensure video autoplay works reliably in iframes
+function armVideoAutoplay(video: HTMLVideoElement | null | undefined) {
+  if (!video) return;
+
+  // required for autoplay in most browsers
+  video.muted = true;
+  video.autoplay = true;
+  video.loop = true;
+  video.playsInline = true;     // iOS Safari
+  video.setAttribute('muted', '');
+  video.setAttribute('playsinline', '');
+  video.setAttribute('autoplay', '');
+
+  const tryPlay = () => {
+    const p = video.play();
+    if (p && typeof p.catch === 'function') p.catch(() => {});
+  };
+
+  // 1) immediately attempt
+  tryPlay();
+
+  // 2) retry when page becomes visible again
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) tryPlay();
+  });
+
+  // 3) retry on focus/pageshow (bfcache / Safari quirks)
+  window.addEventListener('focus', tryPlay);
+  window.addEventListener('pageshow', tryPlay);
+
+  // 4) guarantee a user-gesture path (one tap/click anywhere)
+  window.addEventListener('pointerdown', tryPlay, { capture: true });
+  window.addEventListener('touchstart', tryPlay, { capture: true });
+
+  // 5) optional: keep nudging if it ends up paused
+  setInterval(() => {
+    if (video.paused) tryPlay();
+  }, 1000);
+}
 
 function App() {
   const [viewMode, setViewMode] = useState<'editor' | 'fullscreen'>(
@@ -358,6 +397,25 @@ function App() {
     };
   }, []);
 
+  // Listen for video autoplay re-arm requests from Shopify
+  useEffect(() => {
+    const handleRearmMessage = (event: MessageEvent) => {
+      const data = event && event.data;
+      if (!data || data.type !== 'LG_ARM_VIDEO_AUTOPLAY') return;
+
+      // Re-arm the current video if one is active
+      if (stateRef.current.bgTextureType === 'video' && stateRef.current.controls) {
+        const videoEl = stateRef.current.bgVideoEls.get(stateRef.current.controls.bgType);
+        armVideoAutoplay(videoEl);
+      }
+    };
+
+    window.addEventListener('message', handleRearmMessage);
+    return () => {
+      window.removeEventListener('message', handleRearmMessage);
+    };
+  }, []);
+
   // useEffect(() => {
   //   setLangName(controls.language[0] as keyof typeof languages);
   // }, [controls.language]);
@@ -548,7 +606,8 @@ function App() {
           } else if (stateRef.current.bgTextureType === 'video') {
             stateRef.current.bgTextureReady = false;
             stateRef.current.bgTexture = createEmptyTexture(gl);
-            stateRef.current.bgVideoEls.get(stateRef.current.controls.bgType)?.play();
+            const videoEl = stateRef.current.bgVideoEls.get(stateRef.current.controls.bgType);
+            armVideoAutoplay(videoEl);
           }
         }
       }
